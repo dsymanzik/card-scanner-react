@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { useBoxesStore } from '../stores/boxesStore'
 import { useCardsStore } from '../stores/cardsStore'
 import Badge from '../components/Badge'
