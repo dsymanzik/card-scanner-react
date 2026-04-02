@@ -103,7 +103,7 @@ export default function SuggestionList({
     setPasteError(null)
     setPasteLoading(true)
     try {
-      onSelectFromUrl(identifier)
+      await onSelectFromUrl(identifier)
       setPasteValue('')
     } catch (e) {
       setPasteError(e instanceof Error ? e.message : 'Failed to resolve card')
