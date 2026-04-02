@@ -26,7 +26,7 @@ export interface Card {
   scryfall_suggestions: ScryfallSuggestion[]
 }
 
-// Scryfall suggestion attached to a card
+// Scryfall suggestion attached to a card (legacy — used by Card type for BoxesPage/ExportPage)
 export interface ScryfallSuggestion {
   scryfall_id: string
   confidence: number
@@ -44,20 +44,54 @@ export interface ScryfallSuggestion {
   price_foil: string | null
 }
 
-// Scryfall card from cache (GET /scryfall/cache/:id)
+// Scryfall card — unified type used by review endpoints and CardDetail
 export interface ScryfallCard {
   scryfall_id: string
   name: string
   set_code: string
   collector_number: string
-  mana_cost: string
+  mana_cost: string | null
   type_line: string
-  oracle_text: string
+  oracle_text: string | null
   rarity: string
-  artist: string
+  artist: string | null
   image_url: string | null
   price_normal: string | null
   price_foil: string | null
+  confidence: number | null
+  rank: number | null
+}
+
+// Review endpoint response
+export interface ReviewResponse {
+  box: {
+    id: number
+    name: string
+    total: number
+    unreviewed: number
+  }
+  nav: {
+    pos: number
+    total: number
+    prev_pos: number | null
+    next_pos: number | null
+    next_unreviewed_pos: number | null
+  }
+  card: ReviewCard | null
+}
+
+export interface ReviewCard {
+  id: number
+  position: number
+  photo_urls: string[]
+  foil_detected: boolean
+  foil_user_override: boolean | null
+  condition: string | null
+  reviewed: boolean
+  matched_scryfall_id: string | null
+  suggestion_overridden: boolean
+  matched_card: ScryfallCard | null
+  suggestions: ScryfallCard[]
 }
 
 // Health check response from GET /health
