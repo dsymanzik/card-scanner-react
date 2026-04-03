@@ -7,22 +7,13 @@ import { parseRange } from '../utils/parseRange'
 import type { Box } from '../types'
 
 export default function BoxesPage() {
-  const { boxes, loading, error, fetchBoxes, createBox, renameBox, mergeBox } = useBoxesStore()
+  const { boxes, loading, error, fetchBoxes, renameBox, mergeBox } = useBoxesStore()
   const { cards, fetchCards, moveCards } = useCardsStore()
-
-  const [newBoxName, setNewBoxName] = useState('')
 
   useEffect(() => {
     fetchBoxes()
     fetchCards()
   }, [fetchBoxes, fetchCards])
-
-  const handleCreateBox = async () => {
-    const name = newBoxName.trim()
-    if (!name) return
-    await createBox(name)
-    setNewBoxName('')
-  }
 
   if (loading && boxes.length === 0) {
     return (
@@ -33,37 +24,17 @@ export default function BoxesPage() {
   }
 
   return (
-    <div className="p-6 max-w-3xl">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-6">
+      {/* Header + New Box form */}
+      <div className="flex items-center gap-4 mb-6">
         <h1 className="text-xl font-semibold" style={{ color: '#ccc' }}>
           Your Boxes
         </h1>
-      </div>
-
-      {/* New Box form */}
-      <div className="flex gap-2 mb-6">
-        <input
-          type="text"
-          placeholder="New box name..."
-          value={newBoxName}
-          onChange={(e) => setNewBoxName(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleCreateBox()}
-          className="flex-1 px-3 py-1.5 rounded text-sm outline-none"
-          style={{
-            background: '#2a2a2a',
-            border: '1px solid #3a3a3a',
-            color: '#ccc',
-          }}
-        />
-        <button
-          onClick={handleCreateBox}
-          disabled={!newBoxName.trim()}
-          className="px-4 py-1.5 rounded text-sm font-medium disabled:opacity-40"
-          style={{ background: '#3a3a3a', color: '#ccc' }}
-        >
-          Create
-        </button>
+        {boxes.length > 0 && (
+          <span className="text-xs" style={{ color: '#666' }}>
+            {boxes.length} {boxes.length === 1 ? 'box' : 'boxes'} · {boxes.reduce((sum, b) => sum + b.total, 0)} total cards
+          </span>
+        )}
       </div>
 
       {error && (
@@ -75,10 +46,10 @@ export default function BoxesPage() {
       {/* Box list */}
       {boxes.length === 0 ? (
         <p className="text-sm" style={{ color: '#666' }}>
-          No boxes yet. Create one above.
+          No boxes found.
         </p>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3" style={{ maxWidth: '600px' }}>
           {boxes.map((box) => (
             <BoxRow
               key={box.id}
@@ -101,7 +72,7 @@ export default function BoxesPage() {
 interface BoxRowProps {
   box: Box
   allBoxes: Box[]
-  cards: import('../types').Card[]
+  cards: import('../types').ScannedCard[]
   onRename: (boxId: number, name: string) => Promise<void>
   onMerge: (targetBoxId: number, sourceBoxId: number) => Promise<void>
   onMoveCards: (cardIds: number[], targetBoxId: number) => Promise<void>
@@ -149,71 +120,57 @@ function BoxRow({ box, allBoxes, cards, onRename, onMerge, onMoveCards }: BoxRow
   }
 
   return (
-    <div
-      className="rounded p-4 flex flex-col gap-3"
-      style={{ background: '#2a2a2a', border: '1px solid #3a3a3a' }}
-    >
-      {/* Top row: name link + counts */}
-      <div className="flex items-center gap-3">
-        <Link
-          to={`/review?box_id=${box.id}`}
-          className="font-medium hover:underline"
-          style={{ color: '#ccc' }}
-        >
-          {box.name}
-        </Link>
-        <Badge variant="default">{box.total} cards</Badge>
-        {box.unreviewed > 0 && (
-          <Badge variant="warn">{box.unreviewed} unreviewed</Badge>
-        )}
-      </div>
+    <div className="flex flex-col gap-2">
+      {/* Main row: name + badges + actions all inline */}
+      <div
+        className="rounded px-4 py-3 flex flex-col sm:flex-row sm:items-center gap-3"
+        style={{ background: '#2a2a2a', border: '1px solid #3a3a3a', borderLeft: '3px solid #88ccee' }}
+      >
+        {/* Left: name + counts */}
+        <div className="flex flex-col">
+          <Link
+            to={`/review?box_id=${box.id}`}
+            className="font-medium hover:underline transition-colors duration-150"
+            style={{ color: '#88ccee' }}
+          >
+            {box.name}
+          </Link>
+          <div className="flex items-center gap-2">
+            <span className="text-xs" style={{ color: '#888' }}>
+              {box.total} cards
+            </span>
+            {box.unreviewed > 0 && (
+              <>
+                <span className="text-xs" style={{ color: '#555' }}>·</span>
+                <Badge variant="warn">{box.unreviewed} unreviewed</Badge>
+              </>
+            )}
+          </div>
+        </div>
 
-      {/* Rename */}
-      <div className="flex gap-2 items-center">
-        <input
-          type="text"
-          value={renameValue}
-          onChange={(e) => setRenameValue(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleRename()}
-          className="px-2 py-1 rounded text-sm outline-none"
-          style={{
-            background: '#1a1a1a',
-            border: '1px solid #3a3a3a',
-            color: '#ccc',
-            width: '200px',
-          }}
-        />
-        <button
-          onClick={handleRename}
-          disabled={!renameValue.trim() || renameValue.trim() === box.name}
-          className="px-3 py-1 rounded text-xs disabled:opacity-40"
-          style={{ background: '#3a3a3a', color: '#ccc' }}
-        >
-          Rename
-        </button>
-      </div>
-
-      {/* Merge + Move toggles */}
-      <div className="flex gap-2 flex-wrap">
-        <button
-          onClick={() => { setMergeOpen((o) => !o); setMoveOpen(false) }}
-          className="px-3 py-1 rounded text-xs"
-          style={{ background: '#3a3a3a', color: '#888' }}
-        >
-          Merge into...
-        </button>
-        <button
-          onClick={() => { setMoveOpen((o) => !o); setMergeOpen(false) }}
-          className="px-3 py-1 rounded text-xs"
-          style={{ background: '#3a3a3a', color: '#888' }}
-        >
-          Move cards...
-        </button>
+        {/* Right: rename + actions */}
+        <div className="sm:ml-auto flex items-center gap-2 flex-wrap">
+          <button
+            onClick={() => { setMergeOpen((o) => !o); setMoveOpen(false) }}
+            className="px-3 py-1 rounded text-xs whitespace-nowrap transition-colors duration-150 bg-[#2a2a2a] border border-[#4a4a4a] text-[#ccc] hover:bg-[#353535] hover:border-[#5a5a5a]"
+          >
+            ▶ 📦 Merge into...
+          </button>
+          <button
+            onClick={() => { setMoveOpen((o) => !o); setMergeOpen(false) }}
+            className="px-3 py-1 rounded text-xs whitespace-nowrap transition-colors duration-150 bg-[#2a2a2a] border border-[#4a4a4a] text-[#ccc] hover:bg-[#353535] hover:border-[#5a5a5a]"
+          >
+            ▶ 📦 Move cards...
+          </button>
+        </div>
       </div>
 
       {/* Merge panel */}
       {mergeOpen && (
-        <div className="flex gap-2 items-center flex-wrap pl-1">
+        <div
+          className="rounded px-4 py-2 flex gap-2 items-center flex-wrap"
+          style={{ background: '#252525', border: '1px solid #3a3a3a' }}
+        >
           <span className="text-xs" style={{ color: '#666' }}>
             Merge <span style={{ color: '#ccc' }}>{box.name}</span> into:
           </span>
@@ -252,7 +209,10 @@ function BoxRow({ box, allBoxes, cards, onRename, onMerge, onMoveCards }: BoxRow
 
       {/* Move panel */}
       {moveOpen && (
-        <div className="flex gap-2 items-center flex-wrap pl-1">
+        <div
+          className="rounded px-4 py-2 flex gap-2 items-center flex-wrap"
+          style={{ background: '#252525', border: '1px solid #3a3a3a' }}
+        >
           <span className="text-xs" style={{ color: '#666' }}>
             Move positions:
           </span>

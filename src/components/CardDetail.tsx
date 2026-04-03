@@ -1,7 +1,7 @@
-import type { ScryfallCard } from '../types'
+import type { Card } from '../types'
 
 interface CardDetailProps {
-  card: ScryfallCard
+  card: Card
   onPhotoClick: (src: string, label: string) => void
 }
 

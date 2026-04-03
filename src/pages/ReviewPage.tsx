@@ -6,7 +6,7 @@ import 'yet-another-react-lightbox/styles.css'
 import { useBoxesStore } from '../stores/boxesStore'
 import { getReview, updateReviewCard, selectMatch, selectFromUrl, searchReview } from '../api/review'
 import { CONDITIONS } from '../types'
-import type { ReviewResponse, ScryfallCard } from '../types'
+import type { ReviewResponse, Card } from '../types'
 import Badge from '../components/Badge'
 import PhotoStrip from '../components/PhotoStrip'
 import ReviewNav from '../components/ReviewNav'
@@ -99,7 +99,7 @@ export default function ReviewPage() {
     setReviewData(data)
   }, [card])
 
-  const handleSearch = useCallback(async (name: string, set?: string, cn?: string): Promise<ScryfallCard[]> => {
+  const handleSearch = useCallback(async (name: string, set?: string, cn?: string): Promise<Card[]> => {
     return searchReview(name, set, cn)
   }, [])
 

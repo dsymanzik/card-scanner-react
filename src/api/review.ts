@@ -1,5 +1,5 @@
 import api from './client'
-import type { ReviewResponse, ScryfallCard } from '../types'
+import type { ReviewResponse, Card } from '../types'
 
 export async function getReview(boxId: number, pos: number): Promise<ReviewResponse> {
   const { data } = await api.get<ReviewResponse>('/review', {
@@ -34,10 +34,10 @@ export async function searchReview(
   name: string,
   set?: string,
   collectorNumber?: string
-): Promise<ScryfallCard[]> {
+): Promise<Card[]> {
   const params: Record<string, string> = { name }
   if (set) params.set = set
   if (collectorNumber) params.collector_number = collectorNumber
-  const { data } = await api.get<{ results: ScryfallCard[] }>('/review/search', { params })
+  const { data } = await api.get<{ results: Card[] }>('/review/search', { params })
   return data.results
 }

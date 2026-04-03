@@ -1,9 +1,9 @@
 import { create } from 'zustand'
-import type { Card, CardPatch } from '../types'
+import type { ScannedCard, CardPatch } from '../types'
 import * as cardsApi from '../api/cards'
 
 interface CardsState {
-  cards: Card[]
+  cards: ScannedCard[]
   loading: boolean
   error: string | null
   fetchCards: (boxName?: string) => Promise<void>

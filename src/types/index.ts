@@ -7,45 +7,8 @@ export interface Box {
   unreviewed: number
 }
 
-// Card from GET /cards or GET /cards/:id
+// Scryfall card data — used everywhere cards are displayed
 export interface Card {
-  id: number
-  box_id: number
-  position: number
-  card_file_number: number
-  foil_detected: boolean
-  foil_user_override: boolean | null
-  condition: string | null
-  matched_scryfall_id: string | null
-  reviewed: boolean
-  identified: string | null
-  suggestion_overridden: boolean
-  override_analyzed: boolean
-  scanned_at: string
-  photo_urls: string[]
-  scryfall_suggestions: ScryfallSuggestion[]
-}
-
-// Scryfall suggestion attached to a card (legacy — used by Card type for BoxesPage/ExportPage)
-export interface ScryfallSuggestion {
-  scryfall_id: string
-  confidence: number
-  rank: number
-  name: string
-  set_code: string
-  collector_number: string
-  mana_cost: string
-  type_line: string
-  oracle_text: string
-  rarity: string
-  artist: string
-  image_url: string | null
-  price_normal: string | null
-  price_foil: string | null
-}
-
-// Scryfall card — unified type used by review endpoints and CardDetail
-export interface ScryfallCard {
   scryfall_id: string
   name: string
   set_code: string
@@ -60,6 +23,25 @@ export interface ScryfallCard {
   price_foil: string | null
   confidence: number | null
   rank: number | null
+}
+
+// Scanned card record from GET /cards
+export interface ScannedCard {
+  id: number
+  box_id: number
+  position: number
+  card_file_number: number
+  foil_detected: boolean
+  foil_user_override: boolean | null
+  condition: string | null
+  matched_scryfall_id: string | null
+  reviewed: boolean
+  identified: string | null
+  suggestion_overridden: boolean
+  override_analyzed: boolean
+  scanned_at: string
+  photo_urls: string[]
+  scryfall_suggestions: Card[]
 }
 
 // Review endpoint response
@@ -90,8 +72,8 @@ export interface ReviewCard {
   reviewed: boolean
   matched_scryfall_id: string | null
   suggestion_overridden: boolean
-  matched_card: ScryfallCard | null
-  suggestions: ScryfallCard[]
+  matched_card: Card | null
+  suggestions: Card[]
 }
 
 // Health check response from GET /health

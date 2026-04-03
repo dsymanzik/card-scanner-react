@@ -1,20 +1,20 @@
 import api from './client'
-import type { Card, CardPatch } from '../types'
+import type { ScannedCard, CardPatch } from '../types'
 
-export async function getCards(box?: string): Promise<Card[]> {
+export async function getCards(box?: string): Promise<ScannedCard[]> {
   const params: Record<string, string> = {}
   if (box) params.box = box
-  const { data } = await api.get<Card[]>('/cards', { params })
+  const { data } = await api.get<ScannedCard[]>('/cards', { params })
   return data
 }
 
-export async function getCard(cardId: number): Promise<Card> {
-  const { data } = await api.get<Card>(`/cards/${cardId}`)
+export async function getCard(cardId: number): Promise<ScannedCard> {
+  const { data } = await api.get<ScannedCard>(`/cards/${cardId}`)
   return data
 }
 
-export async function updateCard(cardId: number, fields: CardPatch): Promise<Card> {
-  const { data } = await api.patch<Card>(`/cards/${cardId}`, fields)
+export async function updateCard(cardId: number, fields: CardPatch): Promise<ScannedCard> {
+  const { data } = await api.patch<ScannedCard>(`/cards/${cardId}`, fields)
   return data
 }
 

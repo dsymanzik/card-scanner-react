@@ -1,22 +1,22 @@
-import type { Card, ExportFormat } from '../types'
+import type { ScannedCard, ExportFormat } from '../types'
 
 interface ExportRow {
   [key: string]: string | number
 }
 
-function getEffectiveFoil(card: Card): boolean {
+function getEffectiveFoil(card: ScannedCard): boolean {
   return card.foil_user_override !== null ? card.foil_user_override : card.foil_detected
 }
 
-function getEffectiveScryfallId(card: Card): string {
+function getEffectiveScryfallId(card: ScannedCard): string {
   return card.matched_scryfall_id || card.scryfall_suggestions[0]?.scryfall_id || ''
 }
 
-function getTopSuggestion(card: Card) {
+function getTopSuggestion(card: ScannedCard) {
   return card.scryfall_suggestions[0] ?? null
 }
 
-function buildRow(card: Card, format: ExportFormat, boxName: string): ExportRow {
+function buildRow(card: ScannedCard, format: ExportFormat, boxName: string): ExportRow {
   const foil = getEffectiveFoil(card)
   const sugg = getTopSuggestion(card)
   const name = sugg?.name || ''
@@ -66,7 +66,7 @@ function escapeCSV(value: string | number): string {
 }
 
 export function generateCSV(
-  cards: Card[],
+  cards: ScannedCard[],
   format: ExportFormat,
   boxNameMap: Record<number, string>,
 ): string {

@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react'
-import type { ScryfallCard } from '../types'
+import type { Card } from '../types'
 
 interface SuggestionListProps {
-  suggestions: ScryfallCard[]
-  matchedCard: ScryfallCard | null
+  suggestions: Card[]
+  matchedCard: Card | null
   matchedScryfallId: string | null
   suggestionOverridden: boolean
   cardId: number
   onSelect: (scryfallId: string) => void
   onSelectFromUrl: (identifier: string) => void
-  onSearch: (name: string, set?: string, cn?: string) => Promise<ScryfallCard[]>
+  onSearch: (name: string, set?: string, cn?: string) => Promise<Card[]>
   onPhotoClick: (src: string, label: string) => void
 }
 
@@ -52,7 +52,7 @@ export default function SuggestionList({
   const [searchName, setSearchName] = useState('')
   const [searchSet, setSearchSet] = useState('')
   const [searchNumber, setSearchNumber] = useState('')
-  const [searchResults, setSearchResults] = useState<ScryfallCard[]>([])
+  const [searchResults, setSearchResults] = useState<Card[]>([])
   const [searchLoading, setSearchLoading] = useState(false)
   const [searchError, setSearchError] = useState<string | null>(null)
 
