@@ -12,7 +12,7 @@ export default function PhotoStrip({ photoUrls, onPhotoClick }: PhotoStripProps)
 
   return (
     <div>
-      <div className="grid grid-cols-2 gap-2" style={{ maxWidth: 272 }}>
+      <div className="grid grid-cols-2 gap-2">
         {photoUrls.map((url, i) => (
           <button
             key={url}
