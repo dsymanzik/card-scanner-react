@@ -12,16 +12,15 @@ export default function PhotoStrip({ photoUrls, onPhotoClick }: PhotoStripProps)
 
   return (
     <div>
-      <div className="flex flex-row gap-2 flex-wrap">
+      <div className="grid grid-cols-2 gap-2" style={{ maxWidth: 272 }}>
         {photoUrls.map((url, i) => (
           <button
             key={url}
             type="button"
             onClick={() => onPhotoClick(url, i === 0 ? '★ Primary' : `Photo ${i + 1}`)}
-            className={`rounded overflow-hidden border-2 flex-shrink-0 ${
+            className={`rounded overflow-hidden border-2 aspect-[488/680] ${
               i === 0 ? 'border-[#4a7a9a]' : 'border-transparent'
             } hover:opacity-80 transition-opacity`}
-            style={{ width: 130, height: 182 }}
           >
             <img
               src={url}

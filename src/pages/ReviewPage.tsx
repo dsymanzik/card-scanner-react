@@ -172,7 +172,7 @@ export default function ReviewPage() {
 
       {card && (
         <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-0">
-          <div className="flex flex-col gap-4 lg:w-[380px] lg:flex-shrink-0">
+          <div className="flex flex-col gap-4 lg:w-[270px] lg:shrink-0">
             <PhotoStrip
               photoUrls={card.photo_urls}
               onPhotoClick={openLightbox}

@@ -7,7 +7,7 @@ interface SuggestionListProps {
   matchedScryfallId: string | null
   suggestionOverridden: boolean
   cardId: number
-  onSelect: (scryfallId: string) => void
+  onSelect: (scryfallId: string) => Promise<void>
   onSearch: (name: string, set?: string, cn?: string) => Promise<ScryfallCard[]>
   onPhotoClick: (src: string, label: string) => void
 }
@@ -23,10 +23,10 @@ function MagnifyOverlay({ src, onPhotoClick, label }: { src: string; onPhotoClic
     <button
       type="button"
       onClick={(e) => { e.stopPropagation(); onPhotoClick(src, label) }}
-      className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded"
+      className="absolute top-1 right-1 p-0.5 rounded bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity"
       aria-label="View larger"
     >
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#fff" strokeWidth="1.5">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#fff" strokeWidth="1.5">
         <circle cx="7" cy="7" r="4.5" />
         <path d="M10.5 10.5L14 14" />
         <path d="M7 5v4M5 7h4" />
@@ -47,6 +47,9 @@ export default function SuggestionList({
 }: SuggestionListProps) {
   const topSuggestion = suggestions[0] ?? null
 
+  const [pasteValue, setPasteValue] = useState('')
+  const [pasteError, setPasteError] = useState<string | null>(null)
+
   const [searchName, setSearchName] = useState('')
   const [searchSet, setSearchSet] = useState('')
   const [searchNumber, setSearchNumber] = useState('')
@@ -58,8 +61,8 @@ export default function SuggestionList({
     const prefill = topSuggestion
     if (prefill) {
       setSearchName(prefill.name)
-      setSearchSet(prefill.set_code.toUpperCase())
-      setSearchNumber(prefill.collector_number)
+      setSearchSet('')
+      setSearchNumber('')
     } else {
       setSearchName('')
       setSearchSet('')
@@ -67,6 +70,9 @@ export default function SuggestionList({
     }
     setSearchResults([])
     setSearchError(null)
+    setPasteValue('')
+    setPasteError(null)
+    setPasteLoading(false)
   }, [cardId])
 
   const handleSearch = async () => {
@@ -88,6 +94,26 @@ export default function SuggestionList({
     }
   }
 
+  const [pasteLoading, setPasteLoading] = useState(false)
+
+  const handleUse = async () => {
+    const trimmed = pasteValue.trim()
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+    if (!uuidRegex.test(trimmed)) {
+      setPasteError('Enter a valid Scryfall UUID')
+      return
+    }
+    setPasteError(null)
+    setPasteLoading(true)
+    try {
+      await onSelect(trimmed)
+    } catch {
+      setPasteError('UUID not found')
+    } finally {
+      setPasteLoading(false)
+    }
+  }
+
   const showManualMatch = suggestionOverridden && matchedCard !== null
 
   return (
@@ -95,9 +121,28 @@ export default function SuggestionList({
 
       {/* Search section */}
       <div>
-        <h3 className="text-[#888] text-xs font-semibold uppercase tracking-wide mb-2">
-          Search Scryfall
-        </h3>
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-[#888] text-xs font-semibold uppercase tracking-wide">
+            Search Scryfall
+          </h3>
+          {(searchName || searchSet || searchNumber || pasteValue || searchResults.length > 0) && (
+            <button
+              type="button"
+              onClick={() => {
+                setSearchName('')
+                setSearchSet('')
+                setSearchNumber('')
+                setPasteValue('')
+                setPasteError(null)
+                setSearchResults([])
+                setSearchError(null)
+              }}
+              className="text-[#666] text-xs hover:text-[#aaa] transition-colors"
+            >
+              Clear
+            </button>
+          )}
+        </div>
         <div className="flex flex-col sm:flex-row gap-2">
           <input
             type="text"
@@ -133,21 +178,43 @@ export default function SuggestionList({
           </button>
         </div>
 
+        {/* Paste UUID */}
+        <div className="flex gap-2 mt-2">
+          <input
+            type="text"
+            value={pasteValue}
+            onChange={e => { setPasteValue(e.target.value); setPasteError(null) }}
+            onKeyDown={e => e.key === 'Enter' && handleUse()}
+            placeholder="Paste Scryfall UUID..."
+            className="flex-1 px-2 py-1.5 rounded bg-[#1e1e1e] border border-[#333] text-[#ccc] text-sm focus:outline-none focus:border-[#4a7a9a]"
+          />
+          <button
+            type="button"
+            onClick={handleUse}
+            disabled={pasteLoading || !pasteValue.trim()}
+            className="px-3 py-1.5 rounded bg-[#2a4a2a] text-[#6abf6a] text-sm font-medium hover:bg-[#3a5a3a] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {pasteLoading ? '...' : 'Use'}
+          </button>
+        </div>
+        {pasteError && (
+          <p className="text-[#cc5555] text-xs mt-1">{pasteError}</p>
+        )}
+
         {searchError && (
           <p className="text-[#cc5555] text-xs mt-2">{searchError}</p>
         )}
 
         {/* Search Results — one-click select */}
         {searchResults.length > 0 && (
-          <div className="mt-3 overflow-x-auto pb-2" style={{ scrollbarWidth: 'thin', scrollbarColor: '#4a4a4a #1e1e1e' }}>
-            <div className="flex gap-3" style={{ minWidth: 'min-content' }}>
+          <div className="mt-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-3 xl:grid-cols-5 gap-3">
               {searchResults.map((result) => (
                 <button
                   key={result.scryfall_id}
                   type="button"
                   onClick={() => onSelect(result.scryfall_id)}
-                  className="flex flex-col rounded overflow-hidden transition-all text-left group shrink-0 bg-[#1e1e1e] hover:bg-[#282828]"
-                  style={{ width: 140 }}
+                  className="flex flex-col rounded overflow-hidden transition-all text-left group bg-[#1e1e1e] hover:bg-[#282828]"
                 >
                   <div className="relative aspect-[488/680] w-full">
                     {result.image_url ? (
