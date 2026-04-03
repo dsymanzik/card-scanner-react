@@ -7,8 +7,8 @@ export interface Box {
   unreviewed: number
 }
 
-// Scryfall card data — used everywhere cards are displayed
-export interface Card {
+// Scryfall card data — used for matched_card, suggestions, search results
+export interface ScryfallCard {
   scryfall_id: string
   name: string
   set_code: string
@@ -25,23 +25,23 @@ export interface Card {
   rank: number | null
 }
 
-// Scanned card record from GET /cards
-export interface ScannedCard {
+// Unified scanned card record from GET /cards and GET /review
+export interface Card {
   id: number
   box_id: number
   position: number
-  card_file_number: number
+  photo_urls: string[]
   foil_detected: boolean
   foil_user_override: boolean | null
   condition: string | null
-  matched_scryfall_id: string | null
   reviewed: boolean
   identified: string | null
+  identification_notes: string | null
   suggestion_overridden: boolean
   override_analyzed: boolean
   scanned_at: string
-  photo_urls: string[]
-  scryfall_suggestions: Card[]
+  matched_card: ScryfallCard | null
+  suggestions: ScryfallCard[]
 }
 
 // Review endpoint response
@@ -59,21 +59,7 @@ export interface ReviewResponse {
     next_pos: number | null
     next_unreviewed_pos: number | null
   }
-  card: ReviewCard | null
-}
-
-export interface ReviewCard {
-  id: number
-  position: number
-  photo_urls: string[]
-  foil_detected: boolean
-  foil_user_override: boolean | null
-  condition: string | null
-  reviewed: boolean
-  matched_scryfall_id: string | null
-  suggestion_overridden: boolean
-  matched_card: Card | null
-  suggestions: Card[]
+  card: Card | null
 }
 
 // Health check response from GET /health

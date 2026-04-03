@@ -4,9 +4,9 @@ import Lightbox from 'yet-another-react-lightbox'
 import 'yet-another-react-lightbox/styles.css'
 
 import { useBoxesStore } from '../stores/boxesStore'
-import { getReview, updateReviewCard, selectMatch, selectFromUrl, searchReview } from '../api/review'
+import { getReview, updateReviewCard, selectMatch, searchReview } from '../api/review'
 import { CONDITIONS } from '../types'
-import type { ReviewResponse, Card } from '../types'
+import type { ReviewResponse, ScryfallCard } from '../types'
 import Badge from '../components/Badge'
 import PhotoStrip from '../components/PhotoStrip'
 import ReviewNav from '../components/ReviewNav'
@@ -93,13 +93,7 @@ export default function ReviewPage() {
     setReviewData(data)
   }, [card])
 
-  const handleSelectFromUrl = useCallback(async (identifier: string) => {
-    if (!card) return
-    const data = await selectFromUrl(card.id, identifier)
-    setReviewData(data)
-  }, [card])
-
-  const handleSearch = useCallback(async (name: string, set?: string, cn?: string): Promise<Card[]> => {
+  const handleSearch = useCallback(async (name: string, set?: string, cn?: string): Promise<ScryfallCard[]> => {
     return searchReview(name, set, cn)
   }, [])
 
@@ -232,11 +226,10 @@ export default function ReviewPage() {
             <SuggestionList
               suggestions={card.suggestions}
               matchedCard={card.matched_card}
-              matchedScryfallId={card.matched_scryfall_id}
+              matchedScryfallId={card.matched_card?.scryfall_id ?? null}
               suggestionOverridden={card.suggestion_overridden}
               cardId={card.id}
               onSelect={handleSelectSuggestion}
-              onSelectFromUrl={handleSelectFromUrl}
               onSearch={handleSearch}
               onPhotoClick={openLightbox}
             />

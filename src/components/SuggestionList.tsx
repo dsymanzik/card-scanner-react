@@ -1,15 +1,14 @@
 import { useState, useEffect } from 'react'
-import type { Card } from '../types'
+import type { ScryfallCard } from '../types'
 
 interface SuggestionListProps {
-  suggestions: Card[]
-  matchedCard: Card | null
+  suggestions: ScryfallCard[]
+  matchedCard: ScryfallCard | null
   matchedScryfallId: string | null
   suggestionOverridden: boolean
   cardId: number
   onSelect: (scryfallId: string) => void
-  onSelectFromUrl: (identifier: string) => void
-  onSearch: (name: string, set?: string, cn?: string) => Promise<Card[]>
+  onSearch: (name: string, set?: string, cn?: string) => Promise<ScryfallCard[]>
   onPhotoClick: (src: string, label: string) => void
 }
 
@@ -43,7 +42,6 @@ export default function SuggestionList({
   suggestionOverridden,
   cardId,
   onSelect,
-  onSelectFromUrl,
   onSearch,
   onPhotoClick,
 }: SuggestionListProps) {
@@ -52,13 +50,9 @@ export default function SuggestionList({
   const [searchName, setSearchName] = useState('')
   const [searchSet, setSearchSet] = useState('')
   const [searchNumber, setSearchNumber] = useState('')
-  const [searchResults, setSearchResults] = useState<Card[]>([])
+  const [searchResults, setSearchResults] = useState<ScryfallCard[]>([])
   const [searchLoading, setSearchLoading] = useState(false)
   const [searchError, setSearchError] = useState<string | null>(null)
-
-  const [pasteValue, setPasteValue] = useState('')
-  const [pasteError, setPasteError] = useState<string | null>(null)
-  const [pasteLoading, setPasteLoading] = useState(false)
 
   useEffect(() => {
     const prefill = topSuggestion
@@ -73,9 +67,6 @@ export default function SuggestionList({
     }
     setSearchResults([])
     setSearchError(null)
-    setPasteValue('')
-    setPasteError(null)
-    setPasteLoading(false)
   }, [cardId])
 
   const handleSearch = async () => {
@@ -94,21 +85,6 @@ export default function SuggestionList({
       setSearchError(e instanceof Error ? e.message : 'Search failed')
     } finally {
       setSearchLoading(false)
-    }
-  }
-
-  const handleUse = async () => {
-    const identifier = pasteValue.trim()
-    if (!identifier) return
-    setPasteError(null)
-    setPasteLoading(true)
-    try {
-      await onSelectFromUrl(identifier)
-      setPasteValue('')
-    } catch (e) {
-      setPasteError(e instanceof Error ? e.message : 'Failed to resolve card')
-    } finally {
-      setPasteLoading(false)
     }
   }
 
@@ -156,29 +132,6 @@ export default function SuggestionList({
             {searchLoading ? '...' : '\u2197 Search'}
           </button>
         </div>
-
-        {/* Paste URL / UUID */}
-        <div className="flex gap-1.5 mt-2">
-          <input
-            type="text"
-            value={pasteValue}
-            onChange={e => { setPasteValue(e.target.value); setPasteError(null) }}
-            onKeyDown={e => e.key === 'Enter' && handleUse()}
-            placeholder="Paste Scryfall URL or UUID..."
-            className="flex-1 px-2 py-1 rounded bg-[#1a1a1a] border border-[#2a2a2a] text-[#999] text-xs focus:outline-none focus:border-[#4a7a9a] focus:text-[#ccc]"
-          />
-          <button
-            type="button"
-            onClick={handleUse}
-            disabled={pasteLoading || !pasteValue.trim()}
-            className="px-3 py-1 rounded bg-[#2a3a2a] text-[#4a9a4a] text-xs hover:bg-[#3a4a3a] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {pasteLoading ? '...' : 'Use'}
-          </button>
-        </div>
-        {pasteError && (
-          <p className="text-[#cc5555] text-xs mt-1">{pasteError}</p>
-        )}
 
         {searchError && (
           <p className="text-[#cc5555] text-xs mt-2">{searchError}</p>

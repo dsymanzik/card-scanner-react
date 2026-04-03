@@ -1,7 +1,7 @@
-import type { Card } from '../types'
+import type { ScryfallCard } from '../types'
 
 interface CardDetailProps {
-  card: Card
+  card: ScryfallCard
   onPhotoClick: (src: string, label: string) => void
 }
 
@@ -56,13 +56,13 @@ export default function CardDetail({ card, onPhotoClick }: CardDetailProps) {
           <div>
             <span className="text-[#666]">Normal: </span>
             <span className="text-[#ccc]">
-              {card.price_normal ? `$${card.price_normal}` : '—'}
+              {card.price_normal ? `$${card.price_normal}` : '\u2014'}
             </span>
           </div>
           <div>
             <span className="text-[#666]">Foil: </span>
             <span className="text-[#ccc]">
-              {card.price_foil ? `$${card.price_foil}` : '—'}
+              {card.price_foil ? `$${card.price_foil}` : '\u2014'}
             </span>
           </div>
         </div>

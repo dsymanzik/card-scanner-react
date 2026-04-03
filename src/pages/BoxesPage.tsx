@@ -72,7 +72,7 @@ export default function BoxesPage() {
 interface BoxRowProps {
   box: Box
   allBoxes: Box[]
-  cards: import('../types').ScannedCard[]
+  cards: import('../types').Card[]
   onRename: (boxId: number, name: string) => Promise<void>
   onMerge: (targetBoxId: number, sourceBoxId: number) => Promise<void>
   onMoveCards: (cardIds: number[], targetBoxId: number) => Promise<void>
